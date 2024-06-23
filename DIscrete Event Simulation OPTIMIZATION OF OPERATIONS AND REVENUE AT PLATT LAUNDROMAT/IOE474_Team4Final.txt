@@ -1,0 +1,313 @@
+********************************************************************************
+*                                                                              *
+*                         Formatted Listing of Model:                          *
+* \\engin-labs.m.storage.umich.edu\realneel\windat.v2\Documents\IOE 474\Final Project\ioe474_team4final.mod  *
+*                                                                              *
+********************************************************************************
+
+  Time Units:                        Minutes
+  Distance Units:                    Feet
+
+
+********************************************************************************
+*                                  Locations                                   *
+********************************************************************************
+
+  Name                    Cap      Units Stats       Rules           Cost        
+  ----------------------- -------- ----- ----------- --------------- ------------
+  Entrance_Q              INFINITE 1     Time Series Oldest, FIFO,               
+  dummy                   inf      1     Time Series Oldest, ,                   
+  Laundromat_Sittingspace 30       1     Time Series Oldest, FIFO,               
+  Washer_Large            1        6     Time Series Oldest, , First             
+  Washer_Large.1          1        1     Time Series Oldest, ,                   
+  Washer_Large.2          1        1     Time Series Oldest, ,                   
+  Washer_Large.3          1        1     Time Series Oldest, ,                   
+  Washer_Large.4          1        1     Time Series Oldest, ,                   
+  Washer_Large.5          1        1     Time Series Oldest, ,                   
+  Washer_Large.6          1        1     Time Series Oldest, ,                   
+  Washer_Medium           1        14    Time Series Oldest, , First             
+  Washer_Medium.1         1        1     Time Series Oldest, ,                   
+  Washer_Medium.2         1        1     Time Series Oldest, ,                   
+  Washer_Medium.3         1        1     Time Series Oldest, ,                   
+  Washer_Medium.4         1        1     Time Series Oldest, ,                   
+  Washer_Medium.5         1        1     Time Series Oldest, ,                   
+  Washer_Medium.6         1        1     Time Series Oldest, ,                   
+  Washer_Medium.7         1        1     Time Series Oldest, ,                   
+  Washer_Medium.8         1        1     Time Series Oldest, ,                   
+  Washer_Medium.9         1        1     Time Series Oldest, ,                   
+  Washer_Medium.10        1        1     Time Series Oldest, ,                   
+  Washer_Medium.11        1        1     Time Series Oldest, ,                   
+  Washer_Medium.12        1        1     Time Series Oldest, ,                   
+  Washer_Medium.13        1        1     Time Series Oldest, ,                   
+  Washer_Medium.14        1        1     Time Series Oldest, ,                   
+  Washer_Small            1        9     Time Series Oldest, , First             
+  Washer_Small.1          1        1     Time Series Oldest, ,                   
+  Washer_Small.2          1        1     Time Series Oldest, ,                   
+  Washer_Small.3          1        1     Time Series Oldest, ,                   
+  Washer_Small.4          1        1     Time Series Oldest, ,                   
+  Washer_Small.5          1        1     Time Series Oldest, ,                   
+  Washer_Small.6          1        1     Time Series Oldest, ,                   
+  Washer_Small.7          1        1     Time Series Oldest, ,                   
+  Washer_Small.8          1        1     Time Series Oldest, ,                   
+  Washer_Small.9          1        1     Time Series Oldest, ,                   
+  Dummy2                  1        1     Time Series Oldest, ,                   
+  Dryer_small             1        5     Time Series Oldest, , First             
+  Dryer_small.1           1        1     Time Series Oldest, ,                   
+  Dryer_small.2           1        1     Time Series Oldest, ,                   
+  Dryer_small.3           1        1     Time Series Oldest, ,                   
+  Dryer_small.4           1        1     Time Series Oldest, ,                   
+  Dryer_small.5           1        1     Time Series Oldest, ,                   
+  Dryer_medium            1        8     Time Series Oldest, , First             
+  Dryer_medium.1          1        1     Time Series Oldest, ,                   
+  Dryer_medium.2          1        1     Time Series Oldest, ,                   
+  Dryer_medium.3          1        1     Time Series Oldest, ,                   
+  Dryer_medium.4          1        1     Time Series Oldest, ,                   
+  Dryer_medium.5          1        1     Time Series Oldest, ,                   
+  Dryer_medium.6          1        1     Time Series Oldest, ,                   
+  Dryer_medium.7          1        1     Time Series Oldest, ,                   
+  Dryer_medium.8          1        1     Time Series Oldest, ,                   
+  Dryer_large             1        4     Time Series Oldest, , First             
+  Dryer_large.1           1        1     Time Series Oldest, ,                   
+  Dryer_large.2           1        1     Time Series Oldest, ,                   
+  Dryer_large.3           1        1     Time Series Oldest, ,                   
+  Dryer_large.4           1        1     Time Series Oldest, ,                   
+  Front_desk              1        1     Time Series Oldest, ,                   
+  Vending_machine         1        1     Time Series Oldest, ,                   
+  Detergent_machine       1        1     Time Series Oldest, ,                   
+  ATM                     1        1     Time Series Oldest, ,                   
+  frontdesk_Queue         INFINITE 1     Time Series Oldest, FIFO,               
+
+
+********************************************************************************
+*                                   Entities                                   *
+********************************************************************************
+
+  Name       Speed (fpm)  Stats       Cost        
+  ---------- ------------ ----------- ------------
+  customer   150          Time Series             
+
+
+********************************************************************************
+*                                  Processing                                  *
+********************************************************************************
+
+                                            Process                                Routing
+
+ Entity   Location                Operation            Blk  Output   Destination             Rule     Move Logic
+ -------- ----------------------- ------------------   ---- -------- ----------------------- -------  ------------
+ customer Entrance_Q              // 50% of customers go to the front desk first, and the other 50% go to waiting area
+                                                       1    customer Laundromat_Sittingspace .5 1     
+                                                            customer frontdesk_Queue         .5       
+ customer frontdesk_Queue                              1    customer Front_desk              FIRST 1  FrontDeskType = FrontDesk_Type() // attribute defining what the customer wants from front desk (wash & fold service, products from desk, detergent machine)
+ customer Laundromat_Sittingspace // there is a 5% chance that the wait is >10 mins, in which case the customer leaves
+                                  If customertype = 1 Then
+                                  	{	Route 1 
+                                  	}
+                                  	Else
+                                  	{ 	Route 2 
+                                  	}                   1    customer dummy                   FIRST 1  
+                                                       2    customer EXIT                    FIRST 1  Inc Customers_Lost // counter for customers that left because of long wait times
+ customer dummy                   // depending on load size, customers will go to a different washer size
+                                  If loadType = 1 Then
+                                  	{ 
+                                  	Route 1
+                                  }
+                                  If loadType = 2 Then
+                                  	{ 
+                                  	Route 2
+                                  }
+                                  If loadType = 3 Then
+                                  	{ 
+                                  	Route 3
+                                  }
+                                                       1    customer Washer_Small            FIRST 1  
+                                                       2    customer Washer_Medium           FIRST 1  
+                                                       3    customer Washer_Large            FIRST 1  
+ customer Washer_Small            // if customer goes to a machine with broken card reader, they have to go to ATM, which takes an additional E(5) mins
+                                  If ReaderType = 1 Then {
+                                  Wait 25 + e(5)
+                                  }
+                                  
+                                  If ReaderType = 2 Then {
+                                  Wait 25
+                                  }
+                                  
+                                  // small washers cost an average of $4.25, so that is the standard price
+                                  Inc revenue, SmallWasherPrice
+                                                       1    customer Dummy2                  FIRST 1  
+ customer Washer_Medium           // if customer goes to a machine with broken card reader, they have to go to ATM, which takes an additional E(5) mins
+                                  If ReaderType = 1 Then {
+                                  Wait 25 + e(5)
+                                  }
+                                  
+                                  If ReaderType = 2 Then {
+                                  Wait 25
+                                  }
+                                  
+                                  // medium washers cost $6.25, so that is the standard price
+                                  Inc revenue, MediumWasherPrice
+                                                       1    customer Dummy2                  FIRST 1  
+ customer Washer_Large            // if customer goes to a machine with broken card reader, they have to go to ATM, which takes an additional E(5) mins
+                                  If ReaderType = 1 Then {
+                                  Wait 25 + e(5)
+                                  }
+                                  
+                                  If ReaderType = 2 Then {
+                                  Wait 25
+                                  }
+                                  
+                                  // large washers cost an average of $9.85, so that is the standard price
+                                  Inc revenue, LargeWasherPrice
+                                                       1    customer Dummy2                  FIRST 1  
+ customer Dummy2                  // depending on load size, customers will go to a different dryer size
+                                  // for simplicity, load size is assumed to be uniform across washer and dryer
+                                  If loadType = 1 Then
+                                  	{ 
+                                  	Route 1
+                                  }
+                                  If loadType = 2 Then
+                                  	{ 
+                                  	Route 2
+                                  }
+                                  If loadType = 3 Then
+                                  	{ 
+                                  	Route 3
+                                  }
+                                                       1    customer Dryer_small             FIRST 1  
+                                                       2    customer Dryer_medium            FIRST 1  
+                                                       3    customer Dryer_large             FIRST 1  
+ customer Vending_machine         // we assume an average vending machine purchase of $1.50
+                                  Inc revenue, 1.5
+                                  
+                                  // we assume an average vending machine waiting time of E(2) min
+                                  Wait e(2)            1    customer EXIT                    FIRST 1  
+ customer Front_desk              // type 1: wash & fold service (average price assumed to be $10)
+                                  If FrontDeskType = 1 Then
+                                  {
+                                  Inc revenue, 10
+                                  }
+                                  // type 2: buying laundry products from desk (average price assumed to be $6)
+                                  If FrontDeskType = 2 Then
+                                  { 
+                                  Inc revenue, 6
+                                  }
+                                  // type 3: buying laundry products from detergent machine (average price assumed to be $1)
+                                  If FrontDeskType = 3 Then
+                                  { 
+                                  Inc revenue, 2
+                                  }
+                                  
+                                  // we assume an average front desk waiting time of E(2) min
+                                  Wait e(2)
+                                                       1    customer dummy                   .8 1     
+                                                            customer EXIT                    .2       
+ customer Dryer_small             // if customer goes to a machine with broken card reader, they have to go to ATM, which takes an additional E(5) mins
+                                  If ReaderType = 1 Then {
+                                  Wait T(33,35,37) + e(5)
+                                  }
+                                  
+                                  If ReaderType = 2 Then {
+                                  Wait T(33,35,37)
+                                  }
+                                  
+                                  // small dryers cost $1.25 for average length, so that is the standard price
+                                  Inc revenue, SmallDryerPrice
+                                                       1    customer Vending_machine         .25 1    
+                                                            customer EXIT                    .75      
+ customer Dryer_medium            // if customer goes to a machine with broken card reader, they have to go to ATM, which takes an additional E(5) mins
+                                  If ReaderType = 1 Then {
+                                  Wait T(37,40,43) + e(5)
+                                  }
+                                  
+                                  If ReaderType = 2 Then {
+                                  Wait T(37,40,43)
+                                  }
+                                  
+                                  // medium dryers cost $2 for average length, so that is the standard price
+                                  Inc revenue, MediumDryerPrice
+                                                       1    customer Vending_machine         .25 1    
+                                                            customer EXIT                    .75      
+ customer Dryer_large             // if customer goes to a machine with broken card reader, they have to go to ATM, which takes an additional E(5) mins
+                                  If ReaderType = 1 Then {
+                                  Wait T(40,44,48) + e(5)
+                                  }
+                                  
+                                  If ReaderType = 2 Then {
+                                  Wait T(40,44,48)
+                                  }
+                                  
+                                  // large dryers cost $2.75 for average length, so that is the standard price
+                                  Inc revenue, LargeDryerPrice
+                                                       1    customer Vending_machine         .25 1    
+                                                            customer EXIT                    .75      
+
+
+********************************************************************************
+*                                   Arrivals                                   *
+********************************************************************************
+
+  Entity   Location   Qty Each   First Time Occurrences Frequency           Logic
+  -------- ---------- ---------- ---------- ----------- ------------------- ------------
+  customer Entrance_Q 1          0          INF         E(ArrivalFrequency) customertype = Customer_Type() // attribute defining whether the customer will leave due to long wait times or not
+                                                                            loadType = Load_type() // attribute defining whether customer has small, medium, or large load
+                                                                            ReaderType = Reader_Type() // attribute defining whether customer will use a machine with broken card reader
+                                                                            
+
+
+********************************************************************************
+*                                  Attributes                                  *
+********************************************************************************
+
+  ID            Type         Classification
+  ------------- ------------ --------------
+#
+#1
+  customertype  Integer      Entity        
+  loadType      Integer      Entity        
+  ReaderType    Integer      Entity        
+  FrontDeskType Integer      Entity        
+
+
+********************************************************************************
+*                              Variables (global)                              *
+********************************************************************************
+
+  ID             Type         Initial value Stats      
+  -------------- ------------ ------------- -----------
+  revenue        Real         0             Time Series
+  Customers_Lost Integer      0             Time Series
+
+
+********************************************************************************
+*                                    Macros                                    *
+********************************************************************************
+
+  ID                     Text
+  ---------------------- ------------
+  ArrivalFrequency       5
+  SmallWasherPrice       4.25
+  MediumWasherPrice      6.25
+  LargeWasherPrice       9.85
+  SmallDryerPrice        1.25
+  MediumDryerPrice       2.00
+  LargeDryerPrice        2.75
+
+
+********************************************************************************
+*                              User Distributions                              *
+********************************************************************************
+
+  ID             Type         Cumulative   Percentage   Value       
+  -------------- ------------ ------------ ------------ ------------
+  Customer_Type  Discrete     No           95           1           
+                                           5            2           
+  Load_type      Discrete     No           30           1           
+                                           50           2           
+                                           20           3           
+  Reader_Type    Discrete     No           33           1           
+                                           67           2           
+  FrontDesk_Type Discrete     No           20           1           
+                                           40           2           
+                                           40           3           
+
+
